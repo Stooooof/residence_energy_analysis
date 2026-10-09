@@ -144,12 +144,3 @@ Vacances Été Juillet	1er juillet → 31 juillet 2018
 Vacances Été Août	1er août → 31 août 2018
 
 Projet réalisé dans le cadre d'un TP d'analyse de données de consommation électrique.
-
-Content
-PM01 2018-06-12_22-00-00.CSV
-
-CSV
-
-code.ipynb
-
-IPYNB
