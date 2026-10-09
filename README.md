@@ -34,7 +34,6 @@ residence_energy_analysis/
 │       ├── pm01_ramadan_analysis.png
 │       └── pm01_vacation_analysis.png
 │
-├── rapport_pipeline_PM01.md        ← Rapport détaillé du pipeline
 └── README.md                       ← Ce fichier
 ```
 
