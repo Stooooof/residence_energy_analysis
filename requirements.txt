@@ -1,0 +1,12 @@
+# Manipulation et analyse des données
+pandas>=1.5.0
+ 
+# Calcul numérique (gestion des NaN, IQR)
+numpy>=1.23.0
+ 
+# Visualisation
+matplotlib>=3.6.0
+ 
+# Notebook Jupyter (optionnel, pour notebooks/)
+jupyter>=1.0.0
+ipykernel>=6.0.0
