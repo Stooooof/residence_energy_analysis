@@ -82,15 +82,15 @@ residence_energy_analysis/
 
 ### Colonnes du capteur
 
-|Colonne brute|Colonne nettoyée|Unité|Description|
-|---|---|---|---|
-|`W_PM01`|`active_power_w`|W|Puissance active ← clé|
-|`A_PM01`|—|A|Courant|
-|`VA_PM01`|—|VA|Puissance apparente|
-|`VAR_PM01`|—|VAR|Puissance réactive|
-|`VLL_PM01`|—|V|Tension ligne-ligne|
-|`VLN_PM01`|—|V|Tension ligne-neutre|
-|`PF_PM01`|—|—|Facteur de puissance|
+| Colonne brute  | Nouveau nom         | Unité | Description             | Utilisée |
+|----------------|---------------------|-------|-------------------------|----------|
+| `W_PM01`       | `active_power_w`    | W     | Puissance active        | ✅ Oui   |
+| `A_PM01`       | *(inchangé)*        | A     | Courant                 | ❌ Non   |
+| `VA_PM01`      | *(inchangé)*        | VA    | Puissance apparente     | ❌ Non   |
+| `VAR_PM01`     | *(inchangé)*        | VAR   | Puissance réactive      | ❌ Non   |
+| `VLL_PM01`     | *(inchangé)*        | V     | Tension ligne-ligne     | ❌ Non   |
+| `VLN_PM01`     | *(inchangé)*        | V     | Tension ligne-neutre    | ❌ Non   |
+| `PF_PM01`      | *(inchangé)*        | —     | Facteur de puissance    | ❌ Non   |
 
 ---
 
