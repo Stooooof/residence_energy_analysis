@@ -195,3 +195,109 @@ def plot_ramadan_analysis(ramadan_profiles: dict) -> None:
 
     plt.tight_layout()
     _save_figure(fig, "pm01_ramadan_analysis.png")
+
+# -------------------------------------------------------------
+# GRAPHIQUE 4 : Profil hebdomadaire
+# -------------------------------------------------------------
+
+def plot_weekly_profile(weekly_results: dict) -> None:
+    """
+    Trace 3 graphiques pour le profil hebdomadaire :
+    1. Barres : consommation moyenne par jour (kWh) avec écart-type
+    2. Courbes : profil horaire moyen par jour de la semaine (W)
+    3. Heatmap : puissance moyenne (W) par jour × heure
+
+    Paramètres
+    ----------
+    weekly_results : dict
+        Résultat de analyzer.analyze_weekly_profile()
+    """
+    import numpy as np
+
+    daily_avg = weekly_results["daily_avg"]
+    heatmap   = weekly_results["heatmap"]
+
+    day_names  = daily_avg["day_name"].tolist()
+    avg_energy = daily_avg["avg_energy_kwh"].tolist()
+    std_energy = daily_avg["std_energy_kwh"].tolist()
+    x          = range(len(day_names))
+
+    # Couleurs : semaine en bleu, weekend en orange
+    bar_colors = [
+        "steelblue" if d not in ("Samedi", "Dimanche") else "darkorange"
+        for d in day_names
+    ]
+
+    fig, axes = plt.subplots(3, 1, figsize=(14, 16))
+    fig.suptitle(
+        f"Profil Hebdomadaire — {METER_ID} ({SITE_NAME})",
+        fontsize=14, fontweight="bold"
+    )
+
+    # --- Graphique 1 : Barres consommation moyenne par jour ---
+    ax1 = axes[0]
+    bars = ax1.bar(x, avg_energy, color=bar_colors, alpha=0.85,
+                   yerr=std_energy, capsize=5, label="Conso moyenne (kWh)")
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(day_names)
+    ax1.set_ylabel("Consommation moyenne (kWh)")
+    ax1.set_title("Consommation Moyenne par Jour de la Semaine")
+    ax1.grid(True, alpha=0.3, axis="y")
+
+    # Étiquettes sur les barres
+    for bar, val in zip(bars, avg_energy):
+        ax1.text(bar.get_x() + bar.get_width() / 2,
+                 bar.get_height() + max(std_energy) * 0.05,
+                 f"{val:.1f}", ha="center", va="bottom", fontsize=9)
+
+    # Légende semaine vs weekend
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor="steelblue",  alpha=0.85, label="Semaine"),
+        Patch(facecolor="darkorange", alpha=0.85, label="Weekend"),
+    ]
+    ax1.legend(handles=legend_elements, loc="upper right")
+
+    # --- Graphique 2 : Profil horaire par jour ---
+    ax2 = axes[1]
+    colors_jours = [
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
+        "#9467bd", "#e377c2", "#17becf"
+    ]
+    hours = list(range(24))
+
+    for i, day_name in enumerate(heatmap.index):
+        linestyle = "--" if day_name in ("Samedi", "Dimanche") else "-"
+        ax2.plot(hours, heatmap.loc[day_name].values,
+                 color=colors_jours[i], linewidth=1.8,
+                 linestyle=linestyle, marker="o", markersize=3,
+                 label=day_name)
+
+    ax2.set_title("Profil Horaire Moyen par Jour de la Semaine")
+    ax2.set_xlabel("Heure de la journée")
+    ax2.set_ylabel("Puissance moyenne (W)")
+    ax2.set_xticks(hours)
+    ax2.set_xticklabels([f"{h}h" for h in hours], rotation=45)
+    ax2.grid(True, alpha=0.3)
+    ax2.legend(loc="upper left", ncol=2)
+
+    # --- Graphique 3 : Heatmap jour × heure ---
+    ax3 = axes[2]
+    im = ax3.imshow(
+        heatmap.values,
+        aspect="auto",
+        cmap="YlOrRd",        # jaune → orange → rouge (froid → chaud)
+        interpolation="nearest"
+    )
+    plt.colorbar(im, ax=ax3, label="Puissance moyenne (W)")
+
+    ax3.set_xticks(range(24))
+    ax3.set_xticklabels([f"{h}h" for h in range(24)], rotation=45, fontsize=8)
+    ax3.set_yticks(range(len(heatmap.index)))
+    ax3.set_yticklabels(heatmap.index)
+    ax3.set_title("Heatmap — Puissance Moyenne (W) par Jour et Heure")
+    ax3.set_xlabel("Heure de la journée")
+
+    plt.tight_layout()
+    _save_figure(fig, "pm01_weekly_profile.png")

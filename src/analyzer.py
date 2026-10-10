@@ -191,3 +191,94 @@ def analyze_ramadan(df: pd.DataFrame) -> dict:
     }
 
     return profiles
+
+
+# -------------------------------------------------------------
+# PARTIE 3 : PROFIL HEBDOMADAIRE
+# -------------------------------------------------------------
+
+# Noms des jours en français (0=Lundi ... 6=Dimanche)
+DAY_NAMES_FR = {
+    0: "Lundi",
+    1: "Mardi",
+    2: "Mercredi",
+    3: "Jeudi",
+    4: "Vendredi",
+    5: "Samedi",
+    6: "Dimanche",
+}
+
+def analyze_weekly_profile(df: pd.DataFrame) -> dict:
+    """
+    Calcule deux profils hebdomadaires :
+    1. Consommation totale moyenne par jour de la semaine (kWh)
+    2. Profil horaire moyen par jour de la semaine (W) — heatmap
+
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        DataFrame nettoyé indexé par timestamp
+
+    Retourne
+    --------
+    dict avec clés :
+        - 'daily_avg'  : pd.Series  — conso moyenne (kWh) par jour
+        - 'heatmap'    : pd.DataFrame — puissance moy (W) [jour × heure]
+        - 'stats'      : pd.DataFrame — stats complètes par jour
+    """
+    print("\n[ANALYZE] Profil hebdomadaire...")
+
+    df_copy = df.copy()
+    df_copy["day_of_week"] = df_copy.index.dayofweek      # 0=Lundi, 6=Dimanche
+    df_copy["day_name"]    = df_copy["day_of_week"].map(DAY_NAMES_FR)
+    df_copy["hour"]        = df_copy.index.hour
+    df_copy["date"]        = df_copy.index.date
+
+    # --- 1. Consommation journalière par date ---
+    daily_energy = (
+        df_copy.groupby(["date", "day_of_week", "day_name"])[COL_ENERGY_KWH]
+        .sum()
+        .reset_index()
+    )
+
+    # Moyenne par jour de la semaine
+    daily_avg = (
+        daily_energy
+        .groupby(["day_of_week", "day_name"])[COL_ENERGY_KWH]
+        .agg(["mean", "std", "min", "max", "count"])
+        .reset_index()
+        .sort_values("day_of_week")
+    )
+    daily_avg.columns = [
+        "day_of_week", "day_name",
+        "avg_energy_kwh", "std_energy_kwh",
+        "min_energy_kwh", "max_energy_kwh",
+        "n_days"
+    ]
+
+    # --- 2. Heatmap : puissance moyenne par (jour × heure) ---
+    heatmap = (
+        df_copy
+        .groupby(["day_of_week", "hour"])[COL_POWER_W]
+        .mean()
+        .unstack(level="hour")    # colonnes = heures (0–23)
+    )
+    heatmap.index = [DAY_NAMES_FR[i] for i in heatmap.index]
+
+    # --- Résumé console ---
+    print(f"\n{'Jour':<12} {'Conso moy (kWh)':>16} {'Écart-type':>12} {'Nb jours':>10}")
+    print("-" * 54)
+    for _, row in daily_avg.iterrows():
+        print(f"  {row['day_name']:<10} {row['avg_energy_kwh']:>14.1f} "
+              f"{row['std_energy_kwh']:>12.1f} {row['n_days']:>10.0f}")
+
+    jour_max = daily_avg.loc[daily_avg["avg_energy_kwh"].idxmax(), "day_name"]
+    jour_min = daily_avg.loc[daily_avg["avg_energy_kwh"].idxmin(), "day_name"]
+    print(f"\n  Jour le + consommateur : {jour_max}")
+    print(f"  Jour le - consommateur : {jour_min}")
+
+    return {
+        "daily_avg" : daily_avg,
+        "heatmap"   : heatmap,
+        "stats"     : daily_energy,
+    }
