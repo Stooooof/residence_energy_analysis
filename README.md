@@ -32,7 +32,7 @@ residence_energy_analysis/
 │       ├── pm01_power_consumption.png
 │       ├── pm01_monthly_billing.png
 │       ├── pm01_ramadan_analysis.png
-│       └── pm01_vacation_analysis.png
+│       
 │
 └── README.md                       ← Ce fichier
 ```
